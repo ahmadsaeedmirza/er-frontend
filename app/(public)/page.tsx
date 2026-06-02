@@ -18,6 +18,7 @@ interface Product {
   stockQuantity: number;
   isHidden?: boolean;
   salePrice?: number;
+  isBestSeller?: boolean;
 }
 
 // Fallback mock products if API fails
