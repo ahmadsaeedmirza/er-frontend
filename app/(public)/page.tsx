@@ -144,7 +144,7 @@ export default function Home() {
               <i className="fa-solid fa-chevron-right text-[#CF1745E6]" />
             </Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="flex flex-col md:grid md:grid-cols-4 gap-4">
             <ServiceCard
               imgUrl="/images/manicure.jpg"
               altText="Professional stylist cutting long hair in salon"
