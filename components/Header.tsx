@@ -15,7 +15,7 @@ export default function Header({ cartCount = 0 }: { cartCount?: number }) {
     // Fetch cart count from API
     const fetchCartCount = async () => {
       try {
-        const response = await fetch(`${apiUrl}/api/cart`, {
+        const response = await fetch(`${apiUrl}/api/basket`, {
           method: "GET",
           credentials: "include",
         });
