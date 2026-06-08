@@ -210,9 +210,13 @@ export default async function Home() {
               {displayProducts.map((product: Product) => (
                 <ProductCard
                   key={product._id || product.name}
-                  image={`/images/products/${product.productImage}`}
+                  id={product._id}
+                  slug={product.slug}
+                  price={product.price}
+                  image={product.productImage}
                   title={product.name}
                   description={product.description}
+                  stockQuantity={product.stockQuantity}
                 />
               ))}
             </div>
