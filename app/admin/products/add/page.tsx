@@ -3,12 +3,10 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
+import { getAuthHeaders } from "@/utils/auth";
 
 export default function AddProductPage() {
   const router = useRouter();
-
-  const [adminEmail, setAdminEmail] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -33,10 +31,7 @@ export default function AddProductPage() {
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-  useEffect(() => {
-    // Get admin email from cookie or session
-    setAdminEmail(localStorage.getItem("adminEmail") || "Admin");
-  }, []);
+
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -148,6 +143,7 @@ export default function AddProductPage() {
 
       const response = await fetch(url, {
         method,
+        headers: getAuthHeaders(),
         body: data,
         credentials: "include",
       });
@@ -171,6 +167,7 @@ export default function AddProductPage() {
         });
       }
     } catch (error) {
+      console.error("Failed to add product:", error);
       setMsgBox({
         visible: true,
         message: "Network error. Please try again.",

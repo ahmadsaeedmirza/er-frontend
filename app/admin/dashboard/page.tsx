@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { io } from "socket.io-client";
+import { getAuthHeaders } from "@/utils/auth";
 
 interface DashboardData {
   totals: {
@@ -70,6 +71,7 @@ export default function DashboardPage() {
     try {
       const response = await fetch(`${apiUrl}/api/v1/admin/dashboard-stats`, {
         method: "GET",
+        headers: getAuthHeaders(),
         credentials: "include",
       });
 

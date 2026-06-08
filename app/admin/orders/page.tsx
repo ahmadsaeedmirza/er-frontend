@@ -1,8 +1,9 @@
 "use client";
  
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { io } from "socket.io-client";
+import { getAuthHeaders } from "@/utils/auth";
 
 interface OrderItem {
   productId: string;
@@ -22,6 +23,26 @@ interface Order {
   createdAt: Date;
   createdAtLabel: string;
   searchText: string;
+}
+
+interface RawOrderItem {
+  product?: string | { _id: string; name?: string };
+  quantity?: number;
+}
+
+interface RawOrder {
+  _id: string;
+  createdAt: string;
+  customerName?: string;
+  customerEmail?: string;
+  totalPrice?: number;
+  status?: string;
+  items?: RawOrderItem[];
+}
+
+interface RawProduct {
+  _id: string;
+  name: string;
 }
 
 export default function ManageOrdersPage() {
@@ -49,10 +70,10 @@ export default function ManageOrdersPage() {
   };
 
   // Play synthesized notification sound safely (check SSR)
-  const playNotificationSound = () => {
+  const playNotificationSound = useCallback(() => {
     if (typeof window === "undefined") return;
     try {
-      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
       if (!AudioContextClass) return;
       const audioCtx = new AudioContextClass();
       
@@ -80,101 +101,14 @@ export default function ManageOrdersPage() {
     } catch (error) {
       console.warn("Audio Context error:", error);
     }
-  };
-
-  // Load orders on mount
-  useEffect(() => {
-    loadOrders();
   }, []);
 
-  // Socket.io integration
-  useEffect(() => {
-    const socket = io(apiUrl, {
-      withCredentials: true,
-    });
-
-    socket.on("connect", () => {
-      setIsConnected(true);
-      console.log("Connected to orders socket server");
-    });
-
-    socket.on("disconnect", () => {
-      setIsConnected(false);
-      console.log("Disconnected from orders socket server");
-    });
-
-    socket.on("orderCreated", (order: any) => {
-      const displayId = `#ord-${String(order._id || "").slice(-6).toUpperCase()}`;
-      showToast(`New Order received: ${displayId}`);
-      playNotificationSound();
-      loadOrders(true);
-    });
-
-    socket.on("orderUpdated", () => {
-      loadOrders(true);
-    });
-
-    socket.on("orderDeleted", () => {
-      loadOrders(true);
-    });
-
-    return () => {
-      socket.disconnect();
-    };
-  }, [apiUrl]);
-
-  const loadOrders = async (silent = false) => {
-    if (!silent) setIsLoading(true);
-    try {
-      const [ordersRes, productsRes] = await Promise.all([
-        fetch(`${apiUrl}/api/v1/orders?limit=1000&sort=-createdAt`, {
-          credentials: "include",
-        }),
-        fetch(`${apiUrl}/api/v1/products?limit=1000`, {
-          credentials: "include",
-        }),
-      ]);
-
-      if (ordersRes.status === 401 || productsRes.status === 401) {
-        router.push("/login");
-        return;
-      }
-
-      if (!ordersRes.ok || !productsRes.ok) {
-        throw new Error("Failed to fetch data");
-      }
-
-      const ordersData = await ordersRes.json();
-      const productsData = await productsRes.json();
-
-      const productsList = productsData.data?.data || [];
-      const productsMap = new Map<string, string>(
-        productsList.map((p: any) => [String(p._id), p.name]),
-      );
-
-      const ordersList = (ordersData.data?.data || []).map((order: any) =>
-        normalizeOrder(order, productsMap),
-      );
-
-      setOrders(ordersList);
-      if (!silent) {
-        setCurrentPage(1);
-      }
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unable to load orders";
-      showToast(errorMessage, "error");
-    } finally {
-      if (!silent) setIsLoading(false);
-    }
-  };
-
-  const normalizeOrder = (
-    order: any,
+  const normalizeOrder = useCallback((
+    order: RawOrder,
     productsMap: Map<string, string>,
   ): Order => {
     const createdAtDate = new Date(order.createdAt);
-    const normalizedItems = (order.items || []).map((item: any) => {
+    const normalizedItems = (order.items || []).map((item: RawOrderItem) => {
       const productValue = item?.product;
       const productId =
         typeof productValue === "object" && productValue !== null
@@ -221,7 +155,96 @@ export default function ManageOrdersPage() {
       createdAtLabel: formatDate(createdAtDate),
       searchText,
     };
-  };
+  }, []);
+
+  const loadOrders = useCallback(async (silent = false) => {
+    if (!silent) setIsLoading(true);
+    try {
+      const [ordersRes, productsRes] = await Promise.all([
+        fetch(`${apiUrl}/api/v1/orders?limit=1000&sort=-createdAt`, {
+          headers: getAuthHeaders(),
+          credentials: "include",
+        }),
+        fetch(`${apiUrl}/api/v1/products?limit=1000`, {
+          headers: getAuthHeaders(),
+          credentials: "include",
+        }),
+      ]);
+
+      if (ordersRes.status === 401 || productsRes.status === 401) {
+        router.push("/login");
+        return;
+      }
+
+      if (!ordersRes.ok || !productsRes.ok) {
+        throw new Error("Failed to fetch data");
+      }
+
+      const ordersData = await ordersRes.json();
+      const productsData = await productsRes.json();
+
+      const productsList = (productsData.data?.data || []) as RawProduct[];
+      const productsMap = new Map<string, string>(
+        productsList.map((p) => [String(p._id), p.name]),
+      );
+
+      const ordersList = (ordersData.data?.data || []).map((order: RawOrder) =>
+        normalizeOrder(order, productsMap),
+      );
+
+      setOrders(ordersList);
+      if (!silent) {
+        setCurrentPage(1);
+      }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Unable to load orders";
+      showToast(errorMessage, "error");
+    } finally {
+      if (!silent) setIsLoading(false);
+    }
+  }, [apiUrl, router, normalizeOrder]);
+
+  // Load orders on mount
+  useEffect(() => {
+    loadOrders();
+  }, [loadOrders]);
+
+  // Socket.io integration
+  useEffect(() => {
+    const socket = io(apiUrl, {
+      withCredentials: true,
+    });
+
+    socket.on("connect", () => {
+      setIsConnected(true);
+      console.log("Connected to orders socket server");
+    });
+
+    socket.on("disconnect", () => {
+      setIsConnected(false);
+      console.log("Disconnected from orders socket server");
+    });
+
+    socket.on("orderCreated", (order: { _id: string }) => {
+      const displayId = `#ord-${String(order._id || "").slice(-6).toUpperCase()}`;
+      showToast(`New Order received: ${displayId}`);
+      playNotificationSound();
+      loadOrders(true);
+    });
+
+    socket.on("orderUpdated", () => {
+      loadOrders(true);
+    });
+
+    socket.on("orderDeleted", () => {
+      loadOrders(true);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [apiUrl, loadOrders, playNotificationSound]);
 
   // Apply filters
   useEffect(() => {
@@ -252,7 +275,7 @@ export default function ManageOrdersPage() {
     try {
       const response = await fetch(`${apiUrl}/api/v1/orders/${orderId}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders({ "Content-Type": "application/json" }),
         credentials: "include",
         body: JSON.stringify({ status }),
       });
@@ -268,7 +291,7 @@ export default function ManageOrdersPage() {
       }
 
       const data = await response.json();
-      const updatedOrder = data.data?.data;
+      const updatedOrder = data.data?.data as RawOrder;
 
       if (!updatedOrder) throw new Error("No order data returned");
 
@@ -544,7 +567,7 @@ export default function ManageOrdersPage() {
                     .filter((page) => {
                       const maxButtons = 5;
                       let startPage = Math.max(1, currentPage - 2);
-                      let endPage = Math.min(
+                      const endPage = Math.min(
                         totalPages,
                         startPage + maxButtons - 1,
                       );

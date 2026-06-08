@@ -51,6 +51,7 @@ export default function LoginPage() {
       }
 
       if (data.status === "success") {
+        localStorage.setItem("adminToken", data.token);
         showToast("Login successful");
         // Redirect to dashboard after successful login
         setTimeout(() => {

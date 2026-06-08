@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { io } from "socket.io-client";
+import { getAuthHeaders } from "@/utils/auth";
 
 interface Appointment {
   _id: string;
@@ -138,6 +139,7 @@ export default function ManageAppointmentsPage() {
       const response = await fetch(
         `${apiUrl}/api/v1/appointments?limit=1000&sort=appointmentDate,timeSlot`,
         {
+          headers: getAuthHeaders(),
           credentials: "include",
         },
       );
@@ -303,9 +305,9 @@ export default function ManageAppointmentsPage() {
           `${apiUrl}/api/v1/appointments/${appointmentId}`,
           {
             method: "PATCH",
-            headers: {
+            headers: getAuthHeaders({
               "Content-Type": "application/json",
-            },
+            }),
             credentials: "include",
             body: JSON.stringify({ status: nextStatus }),
           },

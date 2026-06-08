@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function AdminHeader() {
   const router = useRouter();
@@ -32,13 +33,21 @@ export default function AdminHeader() {
   const handleLogout = async () => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
     try {
+      const headers: Record<string, string> = {};
+      const token = localStorage.getItem("adminToken");
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
       await fetch(`${apiUrl}/api/v1/admin/logout`, {
         method: "GET",
+        headers,
         credentials: "include",
       });
-      router.push("/login");
     } catch (error) {
       console.error("Logout failed:", error);
+    } finally {
+      localStorage.removeItem("adminToken");
+      router.push("/login");
     }
   };
 
@@ -47,9 +56,12 @@ export default function AdminHeader() {
       {/* Mobile Header */}
       <header className="md:hidden flex items-center justify-between p-4 bg-[#CF1745] border-b border-slate-200 fixed top-0 w-full z-40">
         <div className="flex items-center gap-2">
-          <img
+          <Image
             src="/images/logo-white.png"
             alt="E & R Salon"
+            width={100}
+            height={35}
+            priority
             className="w-[100px] h-auto"
           />
           <h1 className="text-lg italic font-semibold text-white">
@@ -83,9 +95,12 @@ export default function AdminHeader() {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-6">
-          <img
+          <Image
             src="/images/logo-white.png"
             alt="E & R Salon"
+            width={100}
+            height={35}
+            priority
             className="w-[100px] h-auto"
           />
         </div>

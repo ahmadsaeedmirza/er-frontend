@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { getAuthHeaders } from "@/utils/auth";
 
 interface Product {
   _id: string;
@@ -33,15 +34,11 @@ export default function ManageProductsPage() {
     }, 4000);
   };
 
-  // Load products
-  useEffect(() => {
-    loadProducts();
-  }, []);
-
-  const loadProducts = async () => {
+  const loadProducts = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await fetch(`${apiUrl}/api/v1/products?limit=1000`, {
+        headers: getAuthHeaders(),
         credentials: "include",
       });
 
@@ -65,7 +62,12 @@ export default function ManageProductsPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [apiUrl, router]);
+
+  // Load products
+  useEffect(() => {
+    loadProducts();
+  }, [loadProducts]);
 
   // Apply search filter
   useEffect(() => {
@@ -155,7 +157,7 @@ export default function ManageProductsPage() {
                 Product Inventory
               </h2>
               <p className="text-slate-500 mt-1">
-                Real-time overview of your store's stock levels and catalog.
+                Real-time overview of your store&apos;s stock levels and catalog.
               </p>
             </div>
 
@@ -194,7 +196,7 @@ export default function ManageProductsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
             {filteredProducts.length === 0 && products.length === 0 ? (
               <p className="col-span-full text-slate-500">
-                No products found. Click "Add Product" to create one.
+                No products found. Click &quot;Add Product&quot; to create one.
               </p>
             ) : filteredProducts.length === 0 ? (
               <p className="col-span-full text-slate-500">

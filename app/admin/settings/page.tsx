@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { getAuthHeaders } from "@/utils/auth";
 
 interface AdminProfile {
   _id: string;
@@ -41,18 +42,14 @@ export default function SettingsPage() {
     timestamp: undefined,
   });
 
-  // Load admin profile
-  useEffect(() => {
-    loadAdminProfile();
-  }, []);
-
-  const loadAdminProfile = async () => {
+  const loadAdminProfile = useCallback(async () => {
     setIsLoadingProfile(true);
     setProfileError(null);
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
       const response = await fetch(`${apiUrl}/api/v1/admin/me`, {
+        headers: getAuthHeaders(),
         credentials: "include",
       });
 
@@ -73,7 +70,12 @@ export default function SettingsPage() {
     } finally {
       setIsLoadingProfile(false);
     }
-  };
+  }, [router]);
+
+  // Load admin profile
+  useEffect(() => {
+    loadAdminProfile();
+  }, [loadAdminProfile]);
 
   const validatePasswordForm = (): boolean => {
     setPasswordError(null);
@@ -120,9 +122,9 @@ export default function SettingsPage() {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
       const response = await fetch(`${apiUrl}/api/v1/admin/updateMyPassword`, {
         method: "PATCH",
-        headers: {
+        headers: getAuthHeaders({
           "Content-Type": "application/json",
-        },
+        }),
         credentials: "include",
         body: JSON.stringify({
           passwordCurrent: passwordForm.currentPassword,
@@ -182,13 +184,15 @@ export default function SettingsPage() {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
       await fetch(`${apiUrl}/api/v1/admin/logout`, {
         method: "GET",
+        headers: getAuthHeaders(),
         credentials: "include",
       });
     } catch (error) {
       console.error("Logout error:", error);
+    } finally {
+      localStorage.removeItem("adminToken");
+      router.push("/login");
     }
-
-    router.push("/login");
   };
 
   const formatDate = (dateString?: string): string => {

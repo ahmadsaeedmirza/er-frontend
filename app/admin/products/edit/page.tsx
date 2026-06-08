@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
+import { getAuthHeaders } from "@/utils/auth";
 
 interface Product {
   _id: string;
@@ -23,7 +24,6 @@ export default function EditProductPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [product, setProduct] = useState<Product | null>(null);
   const [adminEmail, setAdminEmail] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [productId, setProductId] = useState<string | null>(null);
@@ -62,20 +62,10 @@ export default function EditProductPage() {
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-  // Extract product ID from search params
-  useEffect(() => {
-    const id = searchParams?.get("id");
-    if (id) {
-      setProductId(id);
-      loadProduct(id);
-    } else {
-      setIsLoading(false);
-    }
-  }, [searchParams]);
-
-  const loadProduct = async (id: string) => {
+  const loadProduct = useCallback(async (id: string) => {
     try {
       const response = await fetch(`${apiUrl}/api/v1/products/${id}`, {
+        headers: getAuthHeaders(),
         credentials: "include",
       });
 
@@ -102,7 +92,6 @@ export default function EditProductPage() {
         throw new Error("No product data in response");
       }
 
-      setProduct(prod);
       setFormData({
         name: prod.name,
         description: prod.description,
@@ -128,7 +117,18 @@ export default function EditProductPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [apiUrl, router]);
+
+  // Extract product ID from search params
+  useEffect(() => {
+    const id = searchParams?.get("id");
+    if (id) {
+      setProductId(id);
+      loadProduct(id);
+    } else {
+      setIsLoading(false);
+    }
+  }, [searchParams, loadProduct]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -241,6 +241,7 @@ export default function EditProductPage() {
 
       const response = await fetch(url, {
         method,
+        headers: getAuthHeaders(),
         body: data,
         credentials: "include",
       });
@@ -264,6 +265,7 @@ export default function EditProductPage() {
         });
       }
     } catch (error) {
+      console.error("Failed to update product:", error);
       setMsgBox({
         visible: true,
         message: "Network error. Please try again.",
@@ -296,7 +298,7 @@ export default function EditProductPage() {
     try {
       const response = await fetch(`${apiUrl}/api/v1/admin/verifyPassword`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders({ "Content-Type": "application/json" }),
         credentials: "include",
         body: JSON.stringify({ password: verifyModal.password }),
       });
@@ -311,6 +313,7 @@ export default function EditProductPage() {
         setVerifyError(data.message || "Password verification failed.");
       }
     } catch (error) {
+      console.error("Failed to verify password:", error);
       setVerifyError("Error verifying password. Please try again.");
     } finally {
       setVerifyLoading(false);
@@ -321,6 +324,7 @@ export default function EditProductPage() {
     if (pendingAction === "delete") {
       const response = await fetch(`${apiUrl}/api/v1/products/${productId}`, {
         method: "DELETE",
+        headers: getAuthHeaders(),
         credentials: "include",
       });
 
@@ -345,7 +349,7 @@ export default function EditProductPage() {
         `${apiUrl}/api/v1/products/${productId}/visibility`,
         {
           method: "PATCH",
-          headers: { "Content-Type": "application/json" },
+          headers: getAuthHeaders({ "Content-Type": "application/json" }),
           credentials: "include",
           body: JSON.stringify({ isHidden: !isProductHidden }),
         },
