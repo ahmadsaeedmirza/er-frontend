@@ -16,6 +16,9 @@ export const metadata: Metadata = {
   title: "E & R Salon - Premium Beauty Services",
   description:
     "Luxury salon offering hair, beauty, and appointment services. Premium salon experience in California.",
+  icons: {
+    icon: "/favicon.png",
+  },
 };
 
 export default function RootLayout({
