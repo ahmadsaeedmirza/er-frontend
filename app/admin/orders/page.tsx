@@ -371,15 +371,15 @@ export default function ManageOrdersPage() {
       )}
 
       {/* Main Content */}
-      <main className="flex-1 bg-white overflow-y-auto p-8">
+      <main className="flex-1 bg-white overflow-y-auto p-4 sm:p-8">
         <div className="max-w-6xl mx-auto space-y-6">
           {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-            <h1 className="text-3xl font-black text-slate-900 pb-4 tracking-tight">
+          <div className="flex flex-row items-center justify-between gap-4">
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
               Orders Overview
             </h1>
             <div
-              className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-semibold shadow-sm transition-all ${
+              className={`shrink-0 inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-semibold shadow-sm transition-all ${
                 isConnected
                   ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                   : "bg-rose-50 text-rose-700 border-rose-200"

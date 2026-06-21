@@ -122,10 +122,10 @@ export default function ManageProductsPage() {
       )}
 
       {/* Main Content */}
-      <main className="flex-1 bg-white overflow-y-auto p-8">
+      <main className="flex-1 bg-white overflow-y-auto p-4 sm:p-8">
         {/* Header */}
-        <div className="mb-8 flex items-center justify-between gap-4 border-b border-slate-200 pb-6">
-          <div className="relative w-full max-w-md">
+        <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-6">
+          <div className="relative w-full md:max-w-md">
             <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
             <input
               type="text"
@@ -136,11 +136,11 @@ export default function ManageProductsPage() {
             />
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="h-8 w-[1px] bg-slate-200"></div>
+          <div className="flex items-center gap-4 self-end md:self-auto">
+            <div className="hidden md:block h-8 w-[1px] bg-slate-200"></div>
             <Link
               href="/admin/products/add"
-              className="bg-[#CF1745] hover:bg-[#CF174580] text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 shadow-lg shadow-[#CF174514] transition-all active:scale-95"
+              className="whitespace-nowrap bg-[#CF1745] hover:bg-[#CF174580] text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 shadow-lg shadow-[#CF174514] transition-all active:scale-95"
             >
               <i className="fa-solid fa-plus"></i>
               Add Product

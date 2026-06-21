@@ -373,22 +373,22 @@ export default function ManageAppointmentsPage() {
           {toast.message}
         </div>
       )}
-      <div className="min-h-screen bg-gray-50 p-6">
+      <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+        <div className="flex flex-row items-start justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl text-black font-bold text-slate-900">
+            <h1 className="text-2xl text-black sm:text-3xl font-bold text-slate-900">
               Manage Appointments
             </h1>
-            <p className="text-slate-600 mt-1">
+            <p className="hidden sm:block text-slate-600 mt-1">
               View, confirm, and manage all customer appointments
             </p>
           </div>
 
           {/* Live Status Indicator */}
           <div
-            className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-semibold shadow-sm transition-all ${
+            className={`shrink-0 inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-semibold shadow-sm transition-all ${
               isConnected
                 ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                 : "bg-rose-50 text-rose-700 border-rose-200"
@@ -540,22 +540,22 @@ export default function ManageAppointmentsPage() {
                 <table className="w-full">
                   <thead>
                     <tr className="bg-gray-50 border-b border-gray-200">
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900 whitespace-nowrap">
                         Client
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900 whitespace-nowrap">
                         Service
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900 whitespace-nowrap">
                         Date & Time
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900 whitespace-nowrap">
                         Contact
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900 whitespace-nowrap">
                         Status
                       </th>
-                      <th className="px-6 py-3 text-right text-sm font-semibold text-slate-900">
+                      <th className="px-6 py-3 text-right text-sm font-semibold text-slate-900 whitespace-nowrap">
                         Actions
                       </th>
                     </tr>
@@ -681,7 +681,7 @@ function AppointmentRow({ appointment, onStatusUpdate }: AppointmentRowProps) {
 
   return (
     <tr className="hover:bg-[#CF1745]/[0.02] transition-colors">
-      <td className="px-6 py-4">
+      <td className="px-6 py-4 whitespace-nowrap">
         <div className="flex flex-col gap-1">
           <p className="font-semibold text-slate-900">
             {appointment.customerName}
@@ -689,21 +689,21 @@ function AppointmentRow({ appointment, onStatusUpdate }: AppointmentRowProps) {
           <p className="text-xs text-slate-500">{appointment.customerEmail}</p>
         </div>
       </td>
-      <td className="px-6 py-4">
+      <td className="px-6 py-4 whitespace-nowrap">
         <span className="inline-flex items-center rounded-full bg-[#CF17450A] px-2.5 py-0.5 text-xs font-medium text-[#CF1745]">
           {appointment.service}
         </span>
       </td>
-      <td className="px-6 py-4">
+      <td className="px-6 py-4 whitespace-nowrap">
         <p className="text-sm font-medium text-slate-900">
           {appointment.formattedDate}
         </p>
         <p className="text-xs text-slate-500">{appointment.formattedTime}</p>
       </td>
-      <td className="px-6 py-4">
+      <td className="px-6 py-4 whitespace-nowrap">
         <p className="text-sm text-slate-700">{appointment.whatsappNumber}</p>
       </td>
-      <td className="px-6 py-4">
+      <td className="px-6 py-4 whitespace-nowrap">
         <span
           className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${getStatusStyles(
             appointment.status,
@@ -712,7 +712,7 @@ function AppointmentRow({ appointment, onStatusUpdate }: AppointmentRowProps) {
           {appointment.status}
         </span>
       </td>
-      <td className="px-6 py-4 text-right">
+      <td className="px-6 py-4 text-right whitespace-nowrap">
         <div className="flex justify-end gap-2">
           <button
             onClick={() => handleAction("deny")}

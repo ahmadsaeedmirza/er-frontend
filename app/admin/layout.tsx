@@ -11,7 +11,7 @@ export default function AdminLayout({
   return (
     <>
       <AdminHeader />
-      <div className="min-h-screen flex flex-col md:ml-64">
+      <div className="min-h-screen flex flex-col md:ml-64 pt-[92px] md:pt-6 bg-white">
         <main className="flex-1 bg-white">{children}</main>
         <AdminFooter />
       </div>
