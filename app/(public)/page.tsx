@@ -55,7 +55,7 @@ export default async function Home() {
         <div className="absolute inset-0 z-0">
           <Image
             alt="Luxury Salon Interior"
-            src="/images/landing-page-img.jpg"
+            src="/images/landing-page-img.jpeg"
             fill
             className="w-full h-full object-cover"
             priority
